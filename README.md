@@ -33,13 +33,13 @@
 
 [Himawari Imaging Bands](https://www.data.jma.go.jp/mscweb/en/himawari89/space_segment/spsg_ahi.html#band)
 
-|       | Channel  | 
-|-------|----------|
-| `VIS` | B03      |
-| `IR1` | B13      | 
-| `IR2` | B15      | 
-| `IR3` | B08      | 
-| `IR4` | B07      | 
+|       | Channel  | µm   |
+|-------|----------|------|
+| `VIS` | B03      | 0.64 | 
+| `IR1` | B13      | 10.4 |
+| `IR2` | B15      | 12.4 |
+| `IR3` | B08      | 6.2  |
+| `IR4` | B07      | 3.9  |
  
 
 # Проблемы и Решения

@@ -86,7 +86,7 @@ def hrit_to_geotiff(
             return None
 
         # Загружаем все файлы HRIT снимка за данное время
-        # config.set(config_path=[f'{C.CONFIG_DIR}'])
+        config.set(config_path=[f'{C.CONFIG_DIR}'])
         scn = Scene(reader=reader, filenames=fnames)
 
         all_datasets = scn.available_dataset_names(composites=True)

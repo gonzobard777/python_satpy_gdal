@@ -1,5 +1,9 @@
 sensor_name: visir/ahi
 
+modifiers:
+  sunz_corrected:
+    modifier: !!python/name:satpy.modifiers.SunZenithCorrector
+
 composites:
   VIS_raw:
     compositor: !!python/name:satpy.composites.SingleBandCompositor
@@ -18,3 +22,36 @@ composites:
     prerequisites:
       - name: B13
     standard_name: IR1_raw
+
+  hrv_severe_storms:
+    compositor: !!python/name:satpy.composites.GenericCompositor
+    prerequisites:
+      - name: B03 # нет HRV, вместо него VIS
+        modifiers: [ sunz_corrected ]
+      - name: B03 # нет HRV, вместо него VIS
+        modifiers: [ sunz_corrected ]
+      - compositor: !!python/name:satpy.composites.DifferenceCompositor
+        prerequisites:
+          - wavelength: 10.4 # в оригнале 10.8
+          - wavelength: 3.9
+    standard_name: hrv_severe_storms
+
+  hrv_severe_storms_blue_masked:
+    compositor: !!python/name:satpy.composites.MaskingCompositor
+    conditions:
+    # Data will be masked where SZA corrected HRV data is less than 70 %, or NaN
+#      - method: less
+#        value: 80
+#        transparency: 70
+      - method: less
+        value: 87
+        transparency: 100
+      - method: isnan
+        transparency: 100
+    prerequisites:
+    # Composite
+    - name: hrv_severe_storms
+    # Data used in masking
+    - name: B03 # нет HRV, вместо него VIS
+      modifiers: [sunz_corrected]
+    standard_name: hrv_severe_storms_blue_masked
