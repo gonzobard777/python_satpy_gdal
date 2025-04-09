@@ -1,0 +1,20 @@
+sensor_name: visir/ahi
+
+composites:
+  VIS_raw:
+    compositor: !!python/name:satpy.composites.SingleBandCompositor
+    prerequisites:
+      - name: B03
+    standard_name: VIS_raw
+  
+  IR2_raw:
+    compositor: !!python/name:satpy.composites.SingleBandCompositor
+    prerequisites:
+      - name: B15
+    standard_name: IR2_raw
+  
+  IR1_raw:
+    compositor: !!python/name:satpy.composites.SingleBandCompositor
+    prerequisites:
+      - name: B13
+    standard_name: IR1_raw

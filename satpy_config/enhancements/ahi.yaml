@@ -1,0 +1,21 @@
+﻿enhancements:
+
+  IR1_raw:
+    standard_name: IR1_raw
+    operations:
+    - name: stretch
+      method: !!python/name:satpy.enhancements.stretch
+      kwargs:
+        stretch: crude
+        min_stretch: [ 300, ]
+        max_stretch: [ 215, ]
+  
+  IR2_raw:
+    standard_name: IR2_raw
+    operations:
+    - name: stretch
+      method: !!python/name:satpy.enhancements.stretch
+      kwargs:
+        stretch: crude
+        min_stretch: [ 300, ]
+        max_stretch: [ 215, ]

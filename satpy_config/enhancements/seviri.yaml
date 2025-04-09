@@ -1,0 +1,107 @@
+enhancements:
+
+  hrv:
+    standard_name: hrv
+    operations:
+    - name: stretch
+      method: !!python/name:satpy.enhancements.stretch
+      kwargs:
+        stretch: crude
+        min_stretch: [0, ]
+        max_stretch: [100, ]
+
+  IR_108_inv:
+    standard_name: IR_108_inv
+    operations:
+    - name: stretch
+      method: !!python/name:satpy.enhancements.stretch
+      kwargs:
+        stretch: crude
+        min_stretch: [300, ]
+        max_stretch: [215, ]
+
+  vis06_filled_hrv:
+    standard_name: vis06_filled_hrv
+    operations:
+    - name: stretch
+      method: !!python/name:satpy.enhancements.stretch
+      kwargs:
+        stretch: crude
+        min_stretch: [0, ]
+        max_stretch: [100, ]
+
+  vis_with_ir:
+    standard_name: vis_with_ir
+    operations:
+    - name: stretch
+      method: !!python/name:satpy.enhancements.stretch
+      kwargs:
+        stretch: crude
+        min_stretch: [0, ]
+        max_stretch: [1, ]
+
+  vis_with_ir_cloud_overlay:
+    standard_name: vis_with_ir_cloud_overlay
+    operations:
+    - name: stretch
+      method: !!python/name:satpy.enhancements.stretch
+      kwargs:
+        stretch: crude
+        min_stretch: [0, 0]
+        max_stretch: [1, 1]
+
+  ct:
+    standard_name: ct
+    operations:
+    - name: stretch
+      method: !!python/name:satpy.enhancements.stretch
+      kwargs:
+        stretch: crude
+        min_stretch: [0, ]
+        max_stretch: [255, ]
+  
+  thunder_gpt_stage2:
+    standard_name: thunder_gpt_stage2
+    operations:
+    - name: stretch
+      method: !!python/name:satpy.enhancements.stretch
+      kwargs:
+        stretch: crude
+        # MaskingCompositor always adds alpha channel
+        min_stretch: [ 10, 0, 180, 0 ]
+        max_stretch: [ 40, 50, 240, 1 ]
+    - name: gamma
+      method: !!python/name:satpy.enhancements.gamma
+      kwargs:
+        # MaskingCompositor always adds alpha channel
+        gamma: [ 2.0, 2.0, 0.5, 1.0 ]
+  
+  hrv_severe_storms_custom:
+    standard_name: hrv_severe_storms_custom
+    operations:
+    - name: stretch
+      method: !!python/name:satpy.enhancements.stretch
+      kwargs:
+        stretch: crude
+        min_stretch: [70, 70, -60]
+        max_stretch: [100, 100, -40]
+    - name: gamma
+      method: !!python/name:satpy.enhancements.gamma
+      kwargs:
+        gamma: [1.7, 1.7, 2.0]
+
+  hrv_severe_storms_blue_masked:
+    standard_name: hrv_severe_storms_blue_masked
+    operations:
+    - name: stretch
+      method: !!python/name:satpy.enhancements.stretch
+      kwargs:
+        stretch: crude
+        # MaskingCompositor always adds alpha channel
+        min_stretch: [70, 70, -60, 0]
+        max_stretch: [100, 100, -40, 1]
+    - name: gamma
+      method: !!python/name:satpy.enhancements.gamma
+      kwargs:
+        # MaskingCompositor always adds alpha channel
+        gamma: [1.7, 1.7, 2.0, 1.0]

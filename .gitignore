@@ -1,0 +1,10 @@
+
+# dependencies
+
+# production
+
+# misc
+.idea
+.vscode
+.DS_Store
+

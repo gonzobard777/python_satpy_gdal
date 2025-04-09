@@ -1,0 +1,4 @@
+GDAL==3.6.2
+satpy==0.53.0
+rasterio==1.4.3
+rioxarray==0.18.1
