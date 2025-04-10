@@ -70,12 +70,12 @@ enhancements:
           # MaskingCompositor always adds alpha channel
           min_stretch: [ 10, 0, 180, 0 ]
           max_stretch: [ 40, 50, 240, 1 ]
-      # # Нужно linear stretching добавить, ибо там диапазон значений маленький
-      #    - name: linear_stretch
-      #      method: !!python/name:satpy.enhancements.stretch
-      #      kwargs:
-      #        stretch: linear
-      #        cutoffs: [0.005, 0.005]
+#       # Нужно linear stretching добавить, ибо там диапазон значений маленький
+#      - name: linear_stretch
+#        method: !!python/name:satpy.enhancements.stretch
+#        kwargs:
+#          stretch: linear
+#          cutoffs: [0.005, 0.005]
       - name: gamma
         method: !!python/name:satpy.enhancements.gamma
         kwargs:
