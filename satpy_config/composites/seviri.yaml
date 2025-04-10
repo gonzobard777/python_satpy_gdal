@@ -36,14 +36,14 @@ composites:
     prerequisites:
     - IR_039
     - IR_108
-    standart_name: ir_ir_diff
+    standard_name: ir_ir_diff
   
   wv_ir_diff:
     compositor: !!python/name:satpy.composites.DifferenceCompositor
     prerequisites:
     - WV_062
     - IR_108
-    standart_name: wv_ir_diff
+    standard_name: wv_ir_diff
 
   thunder_gpt_2:
     compositor: !!python/name:satpy.composites.GenericCompositor
@@ -64,7 +64,7 @@ composites:
     prerequisites:
     - name: thunder_gpt_2
     - name: ir_ir_diff
-    standart_name: thunder_gpt_2_masked
+    standard_name: thunder_gpt_2_masked
   
   thunder_gpt_stage2:
     compositor: !!python/name:satpy.composites.MaskingCompositor
@@ -77,7 +77,7 @@ composites:
     prerequisites:
     - name: thunder_gpt_2_masked
     - name: IR_108
-    standart_name: thunder_gpt_stage2
+    standard_name: thunder_gpt_stage2
 
     
   hrv_severe_storms_blue_masked:
