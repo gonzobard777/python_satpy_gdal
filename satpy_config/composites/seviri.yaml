@@ -6,23 +6,23 @@ modifiers:
 
   co2_corrected:
     modifier: !!python/name:satpy.modifiers.CO2Corrector
-    sensor: [seviri]
+    sensor: [ seviri ]
     prerequisites:
-    - IR_108
-    - IR_134
+      - IR_108
+      - IR_134
 
   rayleigh_corrected:
     modifier: !!python/name:satpy.modifiers.PSPRayleighReflectance
     atmosphere: us-standard
     aerosol_type: rayleigh_only
     prerequisites:
-    - name: VIS006
-      modifiers: [sunz_corrected]
+      - name: VIS006
+        modifiers: [ sunz_corrected ]
     optional_prerequisites:
-    - satellite_azimuth_angle
-    - satellite_zenith_angle
-    - solar_azimuth_angle
-    - solar_zenith_angle
+      - satellite_azimuth_angle
+      - satellite_zenith_angle
+      - solar_azimuth_angle
+      - solar_zenith_angle
 
 composites:
   IR_108_inv:
@@ -34,23 +34,23 @@ composites:
   ir_ir_diff:
     compositor: !!python/name:satpy.composites.DifferenceCompositor
     prerequisites:
-    - IR_039
-    - IR_108
+      - IR_039
+      - IR_108
     standard_name: ir_ir_diff
   
   wv_ir_diff:
     compositor: !!python/name:satpy.composites.DifferenceCompositor
     prerequisites:
-    - WV_062
-    - IR_108
+      - WV_062
+      - IR_108
     standard_name: wv_ir_diff
 
   thunder_gpt_2:
     compositor: !!python/name:satpy.composites.GenericCompositor
     prerequisites:
-    - ir_ir_diff
-    - wv_ir_diff
-    - IR_108
+      - ir_ir_diff
+      - wv_ir_diff
+      - IR_108
     standard_name: thunder_gpt_2
   
   thunder_gpt_2_masked:
@@ -62,8 +62,8 @@ composites:
       - method: isnan
         transparency: 100
     prerequisites:
-    - name: thunder_gpt_2
-    - name: ir_ir_diff
+      - name: thunder_gpt_2
+      - name: ir_ir_diff
     standard_name: thunder_gpt_2_masked
   
   thunder_gpt_stage2:
@@ -75,40 +75,40 @@ composites:
       - method: isnan
         transparency: 100
     prerequisites:
-    - name: thunder_gpt_2_masked
-    - name: IR_108
+      - name: thunder_gpt_2_masked
+      - name: IR_108
     standard_name: thunder_gpt_stage2
 
-    
+
   hrv_severe_storms_blue_masked:
     compositor: !!python/name:satpy.composites.MaskingCompositor
     conditions:
-    # Data will be masked where SZA corrected HRV data is less than 70 %, or NaN
-#      - method: less
-#        value: 80
-#        transparency: 70
+      # Data will be masked where SZA corrected HRV data is less than 70 %, or NaN
+      #      - method: less
+      #        value: 80
+      #        transparency: 70
       - method: less
         value: 87
         transparency: 100
       - method: isnan
         transparency: 100
     prerequisites:
-    # Composite
-    - name: hrv_severe_storms
-    # Data used in masking
-    - name: HRV
-      modifiers: [sunz_corrected]
+      # Composite
+      - name: hrv_severe_storms
+      # Data used in masking
+      - name: HRV
+        modifiers: [ sunz_corrected ]
     standard_name: hrv_severe_storms_blue_masked
 
   hrv_severe_storms_custom:
     compositor: !!python/name:satpy.composites.GenericCompositor
     prerequisites:
-    - name: HRV
-      modifiers: [sunz_corrected]
-    - name: HRV
-      modifiers: [sunz_corrected]
-    - compositor: !!python/name:satpy.composites.DifferenceCompositor
-      prerequisites:
-      - IR_108
-      - IR_039
+      - name: HRV
+        modifiers: [ sunz_corrected ]
+      - name: HRV
+        modifiers: [ sunz_corrected ]
+      - compositor: !!python/name:satpy.composites.DifferenceCompositor
+        prerequisites:
+          - IR_108
+          - IR_039
     standard_name: hrv_severe_storms_custom
