@@ -1,5 +1,6 @@
 import os
 import logging
+logging.basicConfig(level=logging.INFO)
 import subprocess
 import traceback
 
@@ -17,7 +18,6 @@ def save_scene_datasets(scn, output_path, datasets, timestamp, log_prefix):
 
             # Сохраняем во временный файл
             scn.save_dataset(dataset, filename=dataset_temp_output_path, writer="geotiff", compute=True)
-            logging.info(f"| {log_prefix} | scene dataset saved: {dataset}, {dataset_temp_output_path}")
 
             # Конвертируем с помощью gdal_translate, чтобы geotiff не был битым
             proc = subprocess.run([
@@ -27,10 +27,11 @@ def save_scene_datasets(scn, output_path, datasets, timestamp, log_prefix):
                 "-of", f"GTiff",
             ], text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 
-            # Если gdal_translate произошел с ошибкой
-            if proc.returncode != 0:
-                logging.error(
-                    f"| {log_prefix} | gdal_translate return non-zero code {proc.returncode}: \n-- ERROR: --\n {proc.stdout}")
+            if proc.returncode == 0:
+                logging.info(f"| {log_prefix} | scene dataset saved: {dataset}, {dataset_output_path}")
+            else:
+                # Если gdal_translate произошел с ошибкой
+                logging.error(f"| {log_prefix} | gdal_translate return non-zero code {proc.returncode}: \n-- ERROR: --\n {proc.stdout}")
         except:
             logging.error(f"| {log_prefix} | Error in saving dataset: {dataset}:\n{traceback.format_exc()}")
         finally:

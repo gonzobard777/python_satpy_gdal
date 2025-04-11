@@ -3,11 +3,11 @@ import sys
 import time
 import logging
 logging.basicConfig(level=logging.INFO)
+import warnings
+warnings.filterwarnings("ignore")
 import traceback
 import subprocess
-
 import argparse
-
 from osgeo import gdal, osr
 
 

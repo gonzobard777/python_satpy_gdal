@@ -24,7 +24,7 @@ def hrit_to_geotiff(
         move_processed_dir: str = ""
 ) -> str | None:
     try:
-        fnames, reader = init_scene_data(sat,files_dir,timestamp,log_prefix)
+        fnames, reader = init_scene_data(sat,'',timestamp,files_dir,log_prefix)
         if len(fnames) == 0:
             return None
 
@@ -78,12 +78,12 @@ if __name__ == "__main__":
 
     parser.add_argument("files_dir", type=str, help="Path to dir containing HRIT image")
     parser.add_argument("timestamp", type=str, help="Timestamp of image in format YYYYMMDDHHmm")
-    parser.add_argument("sat", type=SatId, help="Satellite Id")
+    parser.add_argument("sat", type=int, help="Satellite Id")
     parser.add_argument("output_path", type=str, help="Path to output geotiff (without .tif postfix)")
-    parser.add_argument("datasets", action="extend", nargs="+", type=str,
+    parser.add_argument("-datasets", action="extend", nargs="+", type=str,
                         help="list of datasets (composites) needed to proceed")
-    parser.add_argument("log_prefix", type=str, default="", help="Log prefix, default empty")
-    parser.add_argument("move_processed_dir", type=str, default="",
+    parser.add_argument("-log_prefix", type=str, default="", help="Log prefix, default empty")
+    parser.add_argument("-move_processed_dir", type=str, default="",
                         help="Path to dir where to move processed raw hrit files")
 
     args = parser.parse_args()
