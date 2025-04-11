@@ -1,5 +1,6 @@
 from hrit2geotif import hrit_to_geotiff
 from constant import C
+from contract import SatId
 
 
 ### MSG
@@ -29,7 +30,7 @@ hour='03'
 hrit_to_geotiff(
     f'{C.HRIT}/himawari/{datetime_str}',
     f"{datetime_str}{hour}00",
-    3,
+    SatId.Himawari,
     ['hrv_severe_storms_blue_masked'], # VIS B03
     f"{C.ASSET_DIR}/result/Himawari"
 )
