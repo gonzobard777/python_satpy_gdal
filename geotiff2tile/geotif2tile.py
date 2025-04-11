@@ -9,60 +9,54 @@ import traceback
 import subprocess
 import argparse
 from osgeo import gdal, osr
+from contract import ProjType
 
 
-def generate_sat_tile(
+def geotif_to_tile(
     input_filename: str,
     output_path: str,
     z: int, x: int, y: int,
-    projection: str,
+    projection: ProjType,
     tile_size_x=512, tile_size_y=512,
     output_type="PNG",
     resampling="near"
 ) -> str | None:
 
-    start_time = time.time()
+    # WGS84 - World Geodetic System 1984, used in GPS: https://epsg.io/4326
+    wgs84 = osr.SpatialReference()
+    wgs84.ImportFromEPSG(4326)
 
-    inproj = osr.SpatialReference()
-    inproj.ImportFromEPSG(4326)
+    target_proj = osr.SpatialReference()
 
-    src_proj = osr.SpatialReference()
-
-    if projection == "mercator":
+    if projection == ProjType.Mercator:
+        # гео-точки bbox на плоскости меркатора, используемого для тайлового пространства на фронте
         left_top_geo = (-179.999999999999, -85.05112877980659)
         right_bottom_geo = (179.999999999999, 85.0511287798066)
 
-        srs = "EPSG:3857"
+        target_srs = "EPSG:3857"
+        target_proj.ImportFromEPSG(3857) # Pseudo-Mercator: https://epsg.io/3857
 
-        src_proj.ImportFromEPSG(3857)
-        transform = osr.CoordinateTransformation(inproj, src_proj)
-
-        # projwin_srs = "EPSG:3857"
-
+        transform = osr.CoordinateTransformation(wgs84, target_proj)
         proj_min_x, proj_min_y, _ = transform.TransformPoint(*left_top_geo[::-1])
         proj_max_x, proj_max_y, _ = transform.TransformPoint(*right_bottom_geo[::-1])
-    elif projection == "stereonorth":
+
+    elif projection == ProjType.StereoNorth:
+        # гео-точки bbox на плоскости stereonorth, используемого для тайлового пространства на фронте
         left_top_geo = (-70, -57.5)
         right_bottom_geo = (110, -57.49999999999997)
 
-        srs = "+proj=stere +lat_0=90 +lon_0=65 +R=6371008"
+        target_srs = "+proj=stere +lat_0=90 +lon_0=65 +R=6371008" # https://proj.org/en/stable/operations/projections/stere.html
+        target_proj.ImportFromProj4(target_srs)
 
-        # projwin_srs = "+proj=stere +lat_0=90 +lon_0=65"
-        src_proj.ImportFromProj4(srs)
-        transform = osr.CoordinateTransformation(inproj, src_proj)
-
+        transform = osr.CoordinateTransformation(wgs84, target_proj)
         proj_min_x, proj_max_y, _ = transform.TransformPoint(*left_top_geo[::-1])
         proj_max_x, proj_min_y, _ = transform.TransformPoint(*right_bottom_geo[::-1])
 
-        # kek_90_x, kek_90_y, _ = transform.TransformPoint(90, 0)
-        # logging.info(f"-> 0 0 point: {kek_90_x}, {kek_90_y}")
     else:
         logging.error(f"Not available projection: {projection}")
         sys.exit(1)
         return None
 
-    # logging.info(f"-> proj min: {proj_min_x}, {proj_min_y}")
-    # logging.info(f"-> proj max: {proj_max_x}, {proj_max_y}")
 
     tile_count = 1 << z
 
@@ -70,23 +64,17 @@ def generate_sat_tile(
     tile_height = (proj_max_y - proj_min_y) / tile_count
 
     xoff = proj_min_x + x * tile_width
-    yoff = proj_min_y + (tile_count - y - 1) * tile_height  # Потому что geotiff инвертирован по Y
-
-    #output_file_name = f"{output_path}/output_{projection}_{z}_{x}_{y}.png"
+    yoff = proj_min_y + (tile_count - y - 1) * tile_height
 
     try:
-        # temp_copy_path = f"{input_filename.split('.tif')[0]}_copy_{time.time_ns()}.tif"
-        # shutil.copyfile(input_filename, temp_copy_path)
         proc = subprocess.run([
             "gdalwarp",
             input_filename,
             f"{output_path}",
             "-ts", f"{tile_size_x}", f"{tile_size_y}",
-            # "-te", f"{xoff}", f"{yoff}", f"{xoff + tile_width}", f"{yoff + tile_height}",
             "-te", format(xoff, 'f'), format(yoff, 'f'), format(xoff + tile_width, 'f'), format(yoff + tile_height, 'f'),
-            "-te_srs", srs,
-            "-t_srs", srs,
-            # "-ot", "Byte",
+            "-te_srs", target_srs,
+            "-t_srs", target_srs,
             "-of", f"{output_type}",
             "-dstalpha",
             "-r", f"{resampling}",
@@ -99,8 +87,8 @@ def generate_sat_tile(
         #         width=tile_size_x,
         #         height=tile_size_y,
         #         outputBounds=(xoff, yoff, xoff + tile_width, yoff + tile_height),
-        #         outputBoundsSRS=srs,
-        #         dstSRS=srs,
+        #         outputBoundsSRS=target_srs,
+        #         dstSRS=target_srs,
         #         format=output_type,
         #         dstAlpha=True,
         #         resampleAlg=resampling,
@@ -158,17 +146,14 @@ def generate_sat_tile(
     #                     pixdata[x, y] = (pix_value[0], pix_value[1], pix_value[2], pix_value[3])
     #                 else:
     #                     pixdata[x, y] = (pix_value[0], pix_value[1])
-
-
     # img.save(output_path, f"{output_type}")
+
 
     # delete aux file:
     try:
         os.remove(f"{output_path}.aux.xml")
     except:
         pass
-
-    # logging.info(f"-> Time of alpha putting: {time.time() - start_time}")
 
     return output_path
 
@@ -182,7 +167,7 @@ if __name__ == "__main__":
     parser.add_argument("-z", "--zoom", type=int, help="Zoom level of tile", required=True)
     parser.add_argument("-x", type=int, help="X coord of tile. Must be in  range [0, 2^z - 1]", required=True)
     parser.add_argument("-y", type=int, help="Y coord of tile. Must be in  range [0, 2^z - 1]", required=True)
-    parser.add_argument("-projection", type=str, help="Projection of result image. Only 'mercator' and 'stereonorth allowed'", choices=["mercator", "stereonorth"], required=True)
+    parser.add_argument("-projection", type=int, help="Projection of result image", required=True)
 
     parser.add_argument("-tile_size_x", type=int, help="Tile width of output raster", default=512)
     parser.add_argument("-tile_size_y", type=int, help="Tile height of output raster", default=512)
@@ -192,7 +177,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    generate_sat_tile(
+    geotif_to_tile(
         args.input_filename,
         args.output_path,
         args.zoom, args.x, args.y,

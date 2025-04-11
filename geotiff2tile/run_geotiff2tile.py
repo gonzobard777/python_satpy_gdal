@@ -1,23 +1,24 @@
+from geotif2tile import geotif_to_tile
 from contract import ProjType
-from geotif2tile import generate_sat_tile
 from constant import C
+from util.sat_str import sat_str
 
 def wrap(
     filename: str,
-    projection: str,
+    proj: ProjType,
     z: int, x: int, y: int,
 )->None:
-    generate_sat_tile(
+    geotif_to_tile(
     f'{C.ASSET_DIR}/{filename}.tif',
-    f'{C.ASSET_DIR}/result/{projection}_{z}_{x}_{y}_{filename}.png',
+    f'{C.ASSET_DIR}/result/{sat_str(proj)}_{z}_{x}_{y}_{filename}.png',
     z,x,y,
-    projection)
+    proj)
 
 
-def make_tiles(filenames: list[str], tiles: list[tuple[int,int,int]], proj_type: str)->None:
+def make_tiles(filenames: list[str], tiles: list[tuple[int,int,int]], proj: ProjType)->None:
     for filename in filenames:
         for z,x,y in tiles:
-            wrap(filename, proj_type, z, x, y, )
+            wrap(filename, proj, z, x, y, )
 
 
 ### MSG

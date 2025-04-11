@@ -1,9 +1,8 @@
 from enum import IntEnum
-from enum import StrEnum
 
-class ProjType(StrEnum):
-    Mercator = 'mercator'
-    StereoNorth = 'stereonorth'
+class ProjType(IntEnum):
+    StereoNorth = 1
+    Mercator = 3
 
 class SatId(IntEnum):
     MSG2 = 1,
