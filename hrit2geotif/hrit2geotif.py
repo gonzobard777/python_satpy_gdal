@@ -52,7 +52,13 @@ def hrit_to_geotiff(
         # img.gamma(0.75)
         # img.save('gamma0_75_crude_resampled.png')
 
-        scn = scn.resample(scn.finest_area(), resampler="nearest")  # Ресемпл необходим для некоторых композитов. Без этого работа скрипта не гарантирована!
+        try:
+            # Ресемпл необходим для некоторых композитов.
+            scn = scn.resample(scn.finest_area(), resampler="nearest")
+        except:
+            logging.error(f"Ошибка при resampling'е: \n-- ERROR: --\n {traceback.format_exc()}")
+            pass
+
         save_scene_datasets(scn, output_path, datasets, timestamp, log_prefix)
 
     except:

@@ -42,7 +42,7 @@ make_tiles(filenames_himawari,[(3,7,4),(6,52,36)], ProjType.Mercator)
 make_tiles(filenames_himawari,[(4,9,8),(4,12,11)], ProjType.StereoNorth)
 
 
-### Тайлики режем из скорректированного GeoTIFF'a (см. adjust_geotiff.py)
+### Тайлики режем из скорректированного GeoTIFF'a (см. adjust_geotif.py)
 
 filenames_adjust_geotiff = [
 'a1_20250401110000_ch04_adjusted-image-1',
