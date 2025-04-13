@@ -24,7 +24,7 @@ def hrit_to_geotiff(
         move_processed_dir: str = ""
 ) -> str | None:
     try:
-        fnames, reader = init_scene_data(sat,'',timestamp,files_dir,log_prefix)
+        fnames, reader = init_scene_data(sat,timestamp,files_dir,None,log_prefix)
         if len(fnames) == 0:
             return None
 
