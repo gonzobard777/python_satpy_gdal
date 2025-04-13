@@ -10,9 +10,9 @@ from contract import SatId
 
 def init_scene_data(
         sat: SatId,
-        channel: str,
         timestamp: str,
         files_dir: str,
+        generic_image_pattern: None | str = None,
         log_prefix: str = '',
 ) -> tuple[list[str], str]:
 
@@ -36,9 +36,8 @@ def init_scene_data(
             pattern=f"{files_dir}/IMG_DK*{(timestamp_dt + timedelta(minutes=x2)).strftime('%Y%m%d%H%M')}_0{segment_str}"
             fnames.extend(glob.glob(pattern))
         reader = 'ahi_hrit'
-    elif (planet_prefix := get_planet_prefix(sat)) is not None: # GeoTIFF
-        pattern = f"{files_dir}/{planet_prefix}_{timestamp}*_{channel}.tif"
-        fnames = glob.glob(pattern)
+    elif generic_image_pattern is not None: # Произвольный файл. Обычно GeoTIFF
+        fnames = glob.glob(generic_image_pattern)
         reader = 'generic_image'
     else:
         logging.error(f"| {log_prefix} | Unknown sat_id: {sat}")
@@ -51,14 +50,3 @@ def init_scene_data(
             logging.info(f"| {log_prefix} |    - {abs_path}")
 
     return fnames, reader
-
-
-# ФГБУ «НИЦ «Планета» предоставляет GeoTIFF-файлы спутников. Каждый файл префиксуется.
-def get_planet_prefix(sat:SatId)->str|None:
-    prefix = None
-    if sat == SatId.PlanetA1: prefix = 'a1'
-    if sat == SatId.PlanetA2: prefix = 'a2'
-    if sat == SatId.PlanetE2: prefix = 'e2'
-    if sat == SatId.PlanetE3: prefix = 'e3'
-    if sat == SatId.PlanetE4: prefix = 'e4'
-    return prefix
