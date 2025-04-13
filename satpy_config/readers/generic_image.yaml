@@ -3,6 +3,4 @@ reader:
 
 datasets:
   image:
-    name: image
-    file_type: graphic
     nodata_handling: nan_mask
