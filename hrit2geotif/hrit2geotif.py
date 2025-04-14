@@ -54,7 +54,8 @@ def hrit_to_geotiff(
 
         try:
             # Ресемпл необходим для некоторых композитов.
-            scn = scn.resample(scn.finest_area(), resampler="nearest")
+            #   NB: не делайте scn.finest_area(), иначе выходные файлики могут увеличиться в размерах раз в 10.
+            scn = scn.resample(scn.coarsest_area(), resampler="nearest")
         except:
             logging.error(f"Ошибка при resampling'е: \n-- ERROR: --\n {traceback.format_exc()}")
             pass
