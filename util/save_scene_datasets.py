@@ -1,44 +1,22 @@
-import os
-import logging
-logging.basicConfig(level=logging.INFO)
-import subprocess
-import traceback
+from util.tmp_filepath import tmp_filepath
+from util.gdal_adjust_geotif import gdal_adjust_geotif
+from util.remove_existed_file import remove_existed_file
 
-def save_scene_datasets(scn, output_path, datasets, timestamp, log_prefix):
+def save_scene_datasets(scn, output_path, datasets, timestamp, log_prefix=''):
     # Проходимся по каждому датасету
-    for dataset in datasets:
-        filename_path=f"{output_path}-{dataset}-{timestamp}"
+    for dataset_id in datasets:
+
         # Путь до финального файла
-        output_file = f"{filename_path}.tif"
-        # Временный выходной файл после scn.save_dataset. Далее, он преобразуется с помощью gdal_translate
-        tmp_file = f"{filename_path}_temp.tif"
+        output_file = f"{output_path}-{dataset_id}-{timestamp}.tif"
 
-        save_scene_dataset(scn, dataset, output_file, tmp_file, log_prefix)
+        save_scene_dataset(scn,dataset_id,output_file,log_prefix)
 
 
-def save_scene_dataset(scn, dataset, output_file, tmp_output_file, log_prefix):
-    try:
-        if os.path.exists(tmp_output_file):
-            os.remove(tmp_output_file)
+def save_scene_dataset(scn, dataset_id, output_file, log_prefix=''):
+    # Сохраняем датасет во временный geotiff
+    tmp_file=tmp_filepath(output_file)
+    remove_existed_file(tmp_file)
+    scn.save_dataset(dataset_id, filename=tmp_file, writer="geotiff", compute=True)
 
-        # Сохраняем во временный файл
-        scn.save_dataset(dataset, filename=tmp_output_file, writer="geotiff", compute=True)
-
-        # Конвертируем с помощью gdal_translate, чтобы geotiff не был битым
-        proc = subprocess.run([
-            "gdal_translate",
-            tmp_output_file,
-            output_file,
-            "-of", f"GTiff",
-        ], text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-
-        if proc.returncode == 0:
-            logging.info(f"| {log_prefix} | scene dataset saved: {dataset}, {output_file}")
-        else:
-            # Если gdal_translate произошел с ошибкой
-            logging.error(f"| {log_prefix} | gdal_translate return non-zero code {proc.returncode}: \n-- ERROR: --\n {proc.stdout}")
-    except:
-        logging.error(f"| {log_prefix} | Error in saving dataset: {dataset}:\n{traceback.format_exc()}")
-    finally:
-        if os.path.exists(tmp_output_file):
-            os.remove(tmp_output_file)
+    # Сооздать результирующий geotiff
+    gdal_adjust_geotif(dataset_id,tmp_file,output_file,remove_src=True,log_prefix=log_prefix)
