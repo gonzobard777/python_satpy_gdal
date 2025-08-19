@@ -13,6 +13,8 @@ def south_up_2_north_up(input_file,output_file,log_prefix='') -> None | bool:
             "-overwrite",
             "-ct", "+proj=pipeline +step +proj=axisswap +order=1,2",
             "-of", "GTiff",
+            "-co", "COMPRESS=LZW",
+            "-co", "PREDICTOR=2",
             input_file,
             output_file,
         ], text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
