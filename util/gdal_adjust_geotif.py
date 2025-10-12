@@ -1,3 +1,4 @@
+import os
 import logging
 logging.basicConfig(level=logging.INFO)
 import subprocess
@@ -10,6 +11,9 @@ def gdal_adjust_geotif(
         dst_file,
         remove_src=False,
         log_prefix=''):
+
+    logging.info(f"| {log_prefix} | gdal_translate, файл: {src_file} | exists: {os.path.exists(src_file)}")
+
     try:
         # Конвертируем с помощью gdal_translate, чтобы geotiff не был битым
         proc = subprocess.run([
