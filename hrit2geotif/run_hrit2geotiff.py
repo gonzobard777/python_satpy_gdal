@@ -5,7 +5,7 @@ from contract import SatId
 
 ### MSG
 
-datetime_str='20250413'
+datetime_str='20251010'
 hour='09'
 
 sat_id=SatId.MSG2

@@ -1,3 +1,4 @@
+import os
 import glob
 import logging
 logging.basicConfig(level=logging.INFO)
@@ -15,6 +16,9 @@ def init_scene_data(
         generic_image_pattern: None | str = None,
         log_prefix: str = '',
 ) -> tuple[list[str], str]:
+
+    dir_list = os.listdir(files_dir)
+    logging.info(f"| {log_prefix} | всего файлов {len(dir_list)} | в папке: {files_dir} ")
 
     fnames=[]
     reader=''
