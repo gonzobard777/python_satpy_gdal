@@ -8,7 +8,7 @@ warnings.filterwarnings("ignore")
 import traceback
 import subprocess
 import argparse
-from osgeo import gdal, osr
+from osgeo import osr
 from contract import ProjType
 
 
