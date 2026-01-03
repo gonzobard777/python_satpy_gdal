@@ -4,7 +4,14 @@ from create_geotiff import create_geotiff
 raster_file_name = 'piter_cell.png'
 geotif_file_name = 'geotiff.tif'
 
-create_geotiff(f"{C.ASSET_DIR}/result/{geotif_file_name}", f"{C.ASSET_DIR}/create_geotiff_raster/{raster_file_name}", [-36.58136622494737, 65.66790173424096], [147.45001377822678, 71.8535678544176], [24.82270010664891, 43.75793517648952], "+proj=stere +lat_0=90 +lon_0=65 +R=6371008")
+create_geotiff(
+    f"{C.ASSET_DIR}/result/{geotif_file_name}",
+    f"{C.ASSET_DIR}/create_geotiff_raster/{raster_file_name}",
+    [-36.58136622494737, 65.66790173424096],
+    [147.45001377822678, 71.8535678544176],
+    [24.82270010664891, 43.75793517648952],
+    "+proj=stere +lat_0=90 +lon_0=65 +R=6371008"
+)
 
 # proj_desc = "+proj=stere +lat_0=90 +lon_0=65 +R=6371008"
 #
