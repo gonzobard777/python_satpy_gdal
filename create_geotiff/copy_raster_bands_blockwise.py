@@ -22,11 +22,11 @@ def copy_raster_bands_blockwise(
       - одинаковое количество band'ов
     """
 
-    width = src.GetRasterXSize()
-    height = src.GetRasterYSize()
+    width = src.RasterXSize
+    height = src.RasterYSize
     bands = src.RasterCount
 
-    if dst.GetRasterXSize() != width or dst.GetRasterYSize() != height:
+    if dst.RasterXSize != width or dst.RasterYSize != height:
         raise Exception("src/dst имеют разные размеры")
     if bands <= 0:
         raise Exception("Источник не содержит band'ов")

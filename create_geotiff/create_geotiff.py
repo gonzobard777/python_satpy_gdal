@@ -37,8 +37,8 @@ def create_geotiff(
     src = gdal.Open(input_raster_path, gdal.GA_ReadOnly)
     if src is None: raise Exception(f"Не удалось открыть входной растр: {input_raster_path}")
 
-    width = src.GetRasterXSize()
-    height = src.GetRasterYSize()
+    width = src.RasterXSize
+    height = src.RasterYSize
     if width <= 0 or height <= 0: raise Exception(f"Некорректный размер входного растра: width={width}, height={height}")
 
     # Количество каналов (band'ов):
