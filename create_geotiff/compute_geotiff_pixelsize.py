@@ -16,7 +16,7 @@ def compute_geotiff_pixelsize(
     Считает pixel_size GeoTIFF по 3 углам растра и координаты LeftTop.
 
     Вход:
-      - left_top_geo, right_top_geo, left_bottom_geo: [lon, lat] в градусах (WGS84)
+      - left_top_geo, right_top_geo, left_bottom_geo: Координаты углов растра, [lon, lat] в градусах (WGS84)
       - proj_desc: строка проекции PROJ
       - width, height: размеры картинки в пикселях
       - tol_rel: относительный допуск на расхождение pixel_size_x и pixel_size_y
