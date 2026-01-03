@@ -1,46 +1,27 @@
 from osgeo import gdal
 
 
-def copy_raster_bands_blockwise(
-        src: gdal.Dataset,
-        dst: gdal.Dataset,
+def copy_raster(
+        raster_dataset: gdal.Dataset,
+        geotiff_dataset: gdal.Dataset,
         preferred_block_size_x: int = 1024,
         preferred_block_size_y: int = 1024,
         min_block_size_y: int = 8,
 ) -> None:
     """
-    Копирует все band'ы из src в dst, удерживая в RAM только один чанк данных.
+    Копирует все band'ы из raster в geotiff, удерживая в RAM только один чанк данных.
     Также переносит NoData, ColorTable и ColorInterpretation.
-
-    Стратегия:
-      - Берём block size у источника
-      - Если это "scanline" (PNG/JPEG часто дают block_y=1) — используем preferred_block_size_x/preferred_block_size_y
-      - Если источник tiled — используем его родной block size
-
-    Предполагается, что:
-      - src и dst имеют одинаковые размеры
-      - одинаковое количество band'ов
     """
 
-    width = src.RasterXSize
-    height = src.RasterYSize
-    bands = src.RasterCount
+    width = raster_dataset.RasterXSize
+    height = raster_dataset.RasterYSize
+    bands = raster_dataset.RasterCount
 
-    if dst.RasterXSize != width or dst.RasterYSize != height:
-        raise Exception("src/dst имеют разные размеры")
-    if bands <= 0:
-        raise Exception("Источник не содержит band'ов")
-    if dst.RasterCount != bands:
-        raise Exception("src/dst имеют разное число band'ов")
-    first_band = src.GetRasterBand(1)
-    if first_band is None:
-        raise Exception("Не удалось получить первый band источника")
-
-    block_x, block_y = first_band.GetBlockSize()
+    block_x, block_y = raster_dataset.GetRasterBand(1).GetBlockSize()
     chunk_x, chunk_y = choose_chunk_size(width, height, block_x, block_y, preferred_block_size_x, preferred_block_size_y, min_block_size_y)
     for i in range(1, bands + 1):
-        src_band = src.GetRasterBand(i)
-        dst_band = dst.GetRasterBand(i)
+        src_band = raster_dataset.GetRasterBand(i)
+        dst_band = geotiff_dataset.GetRasterBand(i)
         if src_band is None or dst_band is None: raise Exception(f"Не удалось получить band {i}")
 
         nodata = src_band.GetNoDataValue()

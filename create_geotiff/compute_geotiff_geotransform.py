@@ -1,18 +1,18 @@
 import math
 from typing import List, Tuple
 
-from osgeo import osr
+from osgeo import gdal, osr
+from osgeo.osr import SpatialReference
 
 
 def compute_geotiff_geotransform(
-        left_top_geo: List[float],
-        right_top_geo: List[float],
-        left_bottom_geo: List[float],
-        proj_desc: str,
-        width: int,
-        height: int,
-        tol_rel: float = 1e-3,  # допуск на "квадратность" пикселя (0.1%)
-        tol_orth: float = 1e-6,  # допуск ортогональности
+        proj: SpatialReference,
+        geotiff_dataset: gdal.Dataset,
+        raster_lt_geo: List[float],  # Угловые точки
+        raster_rt_geo: List[float],  # растровой картинки
+        raster_lb_geo: List[float],  # в гео-координатах.
+        tol_rel: float = 1e-3,  # Допуск на "квадратность" пикселя (0.1%).
+        tol_orth: float = 1e-6,  # Допуск ортогональности.
 ) -> Tuple[float, float, float, float, float, float]:
     """
     Строит ПОЛНЫЙ affine GeoTransform по 3 углам растра в WGS84 (lon/lat) и PROJ-строке проекции.
@@ -35,28 +35,22 @@ def compute_geotiff_geotransform(
         3 угла не смогут описать её корректно.
     """
 
-    if width <= 0 or height <= 0:
-        raise Exception(f"Некорректный размер растра: width={width}, height={height}. Ожидаются положительные значения.")
-
     # WGS84 - World Geodetic System 1984, used in GPS: https://epsg.io/4326
     wgs84 = osr.SpatialReference()
     if wgs84.ImportFromEPSG(4326) != 0: raise Exception("Не удалось создать SRS EPSG:4326 (WGS84).")
     wgs84.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)  # lon,lat → X,Y
 
-    # Целевая СК из PROJ-строки.
-    target_srs = osr.SpatialReference()
-    if target_srs.ImportFromProj4(proj_desc) != 0: raise Exception(f"Не удалось создать SRS из PROJ-строки:\n{proj_desc}")
-    target_srs.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)  # lon,lat → X,Y
-
     # Конвертер.
-    geo_to_proj = osr.CoordinateTransformation(wgs84, target_srs)
+    geo_to_proj = osr.CoordinateTransformation(wgs84, proj)
     if geo_to_proj is None: raise Exception("Не удалось создать преобразование координат (geo -> to proj)")
 
     # Спроецировать углы.
-    xLT, yLT, _ = geo_to_proj.TransformPoint(left_top_geo[0], left_top_geo[1])
-    xRT, yRT, _ = geo_to_proj.TransformPoint(right_top_geo[0], right_top_geo[1])
-    xLB, yLB, _ = geo_to_proj.TransformPoint(left_bottom_geo[0], left_bottom_geo[1])
+    xLT, yLT, _ = geo_to_proj.TransformPoint(raster_lt_geo[0], raster_lt_geo[1])
+    xRT, yRT, _ = geo_to_proj.TransformPoint(raster_rt_geo[0], raster_rt_geo[1])
+    xLB, yLB, _ = geo_to_proj.TransformPoint(raster_lb_geo[0], raster_lb_geo[1])
 
+    width = geotiff_dataset.RasterXSize
+    height = geotiff_dataset.RasterYSize
     # Вектора одного пикселя в проекции.
     # col_vec: куда и на сколько смещается (x,y), если увеличить col на 1 (движение "вправо" по изображению)
     col_vec_x = (xRT - xLT) / width
