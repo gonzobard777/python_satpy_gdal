@@ -18,23 +18,32 @@ def compute_geotransform(
     Строит ПОЛНЫЙ affine GeoTransform по 3 углам растра в WGS84 (lon/lat) и PROJ-строке проекции.
 
     Семантика углов: outer corners (границы пиксельной сетки).
-    Гео-координаты углов растра соответствуют координатам УЗЛОВ пиксельной сетки, а не центров пикселей:
-      - raster_lt_geo -> (col=0, row=0) = LeftTop узел пиксельной сетки
-                                        = LeftTop угол пикселя [0,0]
+        Гео-координаты углов растра соответствуют координатам УЗЛОВ пиксельной сетки, а не центров пикселей:
+          - raster_lt_geo -> (col=0, row=0) = LeftTop узел пиксельной сетки
+                                            = LeftTop угол пикселя [0,0]
 
-      - raster_rt_geo -> (col=W, row=0) = RightTop узел пиксельной сетки
-                                        = RightTop угол пикселя [W-1,0]
+          - raster_rt_geo -> (col=W, row=0) = RightTop узел пиксельной сетки
+                                            = RightTop угол пикселя [W-1,0]
 
-      - raster_lb_geo -> (col=0, row=H) = LeftBottom узел пиксельной сетки
-                                        = LeftBottom угол пикселя [0,H-1]
+          - raster_lb_geo -> (col=0, row=H) = LeftBottom узел пиксельной сетки
+                                            = LeftBottom угол пикселя [0,H-1]
 
-    На примере для W=2, H=2. Здесь [col,row] - индексы узлов пиксельной сетки.
+        На примере для W=2, H=2.
+        Здесь [col,row] - индексы узлов пиксельной сетки; col∈[0..W], row∈[0..H]
 
-        [0,0] ── [1,0] ── [2,0]        LT [0,0] ───────── [2,0] RT
-          │        │        │               │               │
-        [0,1] ── [1,1] ── [2,1]    =>       │               │
-          │        │        │               │               │
-        [0,2] ── [1,2] ── [2,2]        LB [0,2] ───────── [2,2] RB
+            [0,0] ── [1,0] ── [2,0]        LT [0,0] ───────── [2,0] RT
+              │        │        │               │               │
+            [0,1] ── [1,1] ── [2,1]    =>       │               │
+              │        │        │               │               │
+            [0,2] ── [1,2] ── [2,2]        LB [0,2] ───────── [2,2] RB
+
+        Я убедился, что у меня семантика углов outer corners, таким образом:
+            geoToPixel(pixelToGeo([0,0]              )) ≈ [0,0]
+            geoToPixel(pixelToGeo([width,0]          )) ≈ [width,0]
+            geoToPixel(pixelToGeo([0,height]         )) ≈ [0,height]
+            geoToPixel(pixelToGeo([width, height]    )) ≈ [width, height]
+            geoToPixel(pixelToGeo([width/2, height/2])) ≈ [width/2, height/2]
+        в пределах машинной погрешности (~1e-12)
 
 
     Возвращает GeoTransform (gt0..gt5), который сохраняет возможный поворот/скос:
