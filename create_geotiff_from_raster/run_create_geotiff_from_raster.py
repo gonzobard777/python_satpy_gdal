@@ -1,8 +1,8 @@
 from constant import C
 from create_geotiff_from_raster import create_geotiff_from_raster
 
-raster_file_name = 'countries_800x800.png'
-geotif_file_name = 'geotiff.tif'
+raster_file_name = 'countries_8000x8000.png'
+geotif_file_name = 'geotiff_8000x8000.tif'
 
 create_geotiff_from_raster(
     "+proj=stere +lat_0=90 +lon_0=65 +R=6371008",
