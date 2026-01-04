@@ -67,7 +67,8 @@ def compute_geotransform(
 
     # Конвертер.
     geo_to_proj = osr.CoordinateTransformation(geo, proj)
-    if geo_to_proj is None: raise Exception("Не удалось создать конвертер geo_to_proj")
+    if geo_to_proj is None:
+        raise Exception("Не удалось создать конвертер geo_to_proj")
 
     # Спроецировать углы растра.
     xLT, yLT, _ = geo_to_proj.TransformPoint(raster_lt_geo[0], raster_lt_geo[1])
@@ -76,11 +77,14 @@ def compute_geotransform(
 
     width = geotiff_dataset.RasterXSize
     height = geotiff_dataset.RasterYSize
-    # Вектора одного пикселя в проекции.
-    # col_vec: куда и на сколько смещается (x,y), если увеличить col на 1 (движение "вправо" по изображению)
+
+    # col_vec (gt1, gt4) - Первый базисный вектор (ось X изображения).
+    # col_vec: куда и на сколько смещается (x,y), если увеличить col на 1 (движение "вправо" по изображению).
     col_vec_x = (xRT - xLT) / width
     col_vec_y = (yRT - yLT) / width
-    # row_vec: куда и на сколько смещается (x,y), если увеличить row на 1 (движение "вниз" по изображению)
+
+    # row_vec (gt2, gt5) - Второй базисный вектор (ось Y изображения).
+    # row_vec: куда и на сколько смещается (x,y), если увеличить row на 1 (движение "вниз" по изображению).
     row_vec_x = (xLB - xLT) / height
     row_vec_y = (yLB - yLT) / height
 
