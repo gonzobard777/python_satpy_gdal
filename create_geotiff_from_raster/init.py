@@ -11,20 +11,19 @@ def init(
         geotiff_path: str,
         geotiff_creation_opts: Optional[List[str]] = None,
 ) -> Tuple[SpatialReference, gdal.Dataset, gdal.Dataset]:
-    # Создать проекцию по описанию.
+    # Создать проекцию по её описанию в формате OSGeo/PROJ.
     proj = osr.SpatialReference()
     if proj.ImportFromProj4(proj_desc) != 0:
-        raise Exception(f"Не удалось создать проекцию по описанию:\n{proj_desc}")
+        raise Exception(f"Не удалось создать проекцию:\n{proj_desc}")
 
     # Открыть растровую картинку.
     raster_dataset = gdal.Open(raster_path, gdal.GA_ReadOnly)
     if raster_dataset is None:
-        raise Exception(f"Не удалось открыть входной растр: {raster_path}")
-
+        raise Exception(f"Не удалось открыть растр: {raster_path}")
     width = raster_dataset.RasterXSize
     height = raster_dataset.RasterYSize
     if width <= 0 or height <= 0:
-        raise Exception(f"Некорректный размер входного растра: width={width}, height={height}")
+        raise Exception(f"Некорректный размер растра: width={width}, height={height}")
 
     # Количество каналов (band'ов):
     #   1  → grayscale
@@ -33,7 +32,7 @@ def init(
     #   N  → произвольное многоканальное изображение
     bands = raster_dataset.RasterCount
     if bands <= 0:
-        raise Exception("Входной файл не содержит raster band'ов")
+        raise Exception(f"В растре некорректное кол-во каналов: {bands}")
 
     # Тип данных одного пикселя (берём из первого band'а, обычно одинаковый для всех band'ов):
     #   gdal.GDT_Byte    → uint8
@@ -45,15 +44,15 @@ def init(
     #   gdal.GDT_Float64 → float64
     first_band = raster_dataset.GetRasterBand(1)
     if first_band is None:
-        raise Exception("Не удалось получить первый band входного растра")
+        raise Exception("Не удалось получить первый канал растра")
 
-    # Удалить существующий GeoTIFF-файл, если есть.
+    # Удалить существующий GeoTIFF-файл.
     if os.path.exists(geotiff_path):
         os.remove(geotiff_path)
 
     driver = gdal.GetDriverByName("GTiff")
     if driver is None:
-        raise Exception("Не найден драйвер GDAL 'GTiff'.")
+        raise Exception("Не найден драйвер GDAL 'GTiff'")
 
     if geotiff_creation_opts is None:
         geotiff_creation_opts = [
@@ -63,11 +62,12 @@ def init(
         ]
 
     # Создать GeoTIFF.
+    # https://gdal.org/en/stable/api/python/raster_api.html
     geotiff_dataset = driver.Create(
         geotiff_path,
-        width,
-        height,
-        bands,
+        width,  # ширина создаваемого растра в пикселях
+        height,  # высота создаваемого растра в пикселях
+        bands,  # число каналов
         first_band.DataType,
         options=geotiff_creation_opts
     )
@@ -76,6 +76,6 @@ def init(
     if geotiff_dataset.RasterXSize != width or geotiff_dataset.RasterYSize != height:
         raise Exception("raster/geotiff имеют разные размеры")
     if geotiff_dataset.RasterCount != bands:
-        raise Exception("raster/geotiff имеют разное число band'ов")
+        raise Exception("raster/geotiff имеют разное число каналов")
 
     return (proj, raster_dataset, geotiff_dataset)

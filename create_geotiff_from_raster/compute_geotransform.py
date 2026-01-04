@@ -5,14 +5,14 @@ from osgeo import gdal, osr
 from osgeo.osr import SpatialReference
 
 
-def compute_geotiff_geotransform(
+def compute_geotransform(
         proj: SpatialReference,
         geotiff_dataset: gdal.Dataset,
         raster_lt_geo: List[float],  # Угловые точки
         raster_rt_geo: List[float],  # растровой картинки
         raster_lb_geo: List[float],  # в гео-координатах.
         tol_rel: float = 1e-3,  # Допуск на "квадратность" пикселя (0.1%).
-        tol_orth: float = 1e-6,  # Допуск ортогональности.
+        tol_ort: float = 1e-6,  # Допуск ортогональности.
 ) -> Tuple[float, float, float, float, float, float]:
     """
     Строит ПОЛНЫЙ affine GeoTransform по 3 углам растра в WGS84 (lon/lat) и PROJ-строке проекции.
@@ -36,15 +36,16 @@ def compute_geotiff_geotransform(
     """
 
     # WGS84 - World Geodetic System 1984, used in GPS: https://epsg.io/4326
-    wgs84 = osr.SpatialReference()
-    if wgs84.ImportFromEPSG(4326) != 0: raise Exception("Не удалось создать SRS EPSG:4326 (WGS84).")
-    wgs84.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)  # lon,lat → X,Y
+    geo = osr.SpatialReference()
+    if geo.ImportFromEPSG(4326) != 0:
+        raise Exception("Не удалось создать SRS EPSG:4326 (WGS84).")
+    geo.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)  # lon,lat → X,Y
 
     # Конвертер.
-    geo_to_proj = osr.CoordinateTransformation(wgs84, proj)
-    if geo_to_proj is None: raise Exception("Не удалось создать преобразование координат (geo -> to proj)")
+    geo_to_proj = osr.CoordinateTransformation(geo, proj)
+    if geo_to_proj is None: raise Exception("Не удалось создать конвертер geo_to_proj")
 
-    # Спроецировать углы.
+    # Спроецировать углы растра.
     xLT, yLT, _ = geo_to_proj.TransformPoint(raster_lt_geo[0], raster_lt_geo[1])
     xRT, yRT, _ = geo_to_proj.TransformPoint(raster_rt_geo[0], raster_rt_geo[1])
     xLB, yLB, _ = geo_to_proj.TransformPoint(raster_lb_geo[0], raster_lb_geo[1])
@@ -75,9 +76,9 @@ def compute_geotiff_geotransform(
     # Для перпендикулярных векторов cos(theta) = 0.
     dot = col_vec_x * row_vec_x + col_vec_y * row_vec_y
     cos_theta_abs = abs(dot) / (col_len * row_len)
-    if cos_theta_abs > tol_orth: raise Exception("Оси растра в проекции не образуют прямой угол в пределах допуска.\n"
-                                                 f"|cos(theta)| = {cos_theta_abs:.12g}, допустимо ≤ {tol_orth}\n"
-                                                 "Проверьте соответствие углов исходному изображению и проекцию, либо ослабьте tol_orth.")
+    if cos_theta_abs > tol_ort: raise Exception("Оси растра в проекции не образуют прямой угол в пределах допуска.\n"
+                                                f"|cos(theta)| = {cos_theta_abs:.12g}, допустимо ≤ {tol_ort}\n"
+                                                "Проверьте соответствие углов исходному изображению и проекцию, либо ослабьте tol_orth.")
     # Собрать GeoTransform.
     # gt0,gt3 — координаты точки (col=0,row=0) = LeftTop
     # gt1,gt4 — вклад от col (шаг + возможный поворот)

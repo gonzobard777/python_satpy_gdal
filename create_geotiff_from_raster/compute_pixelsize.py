@@ -3,7 +3,7 @@ from typing import List, Tuple
 from osgeo import osr
 
 
-def compute_geotiff_pixelsize(
+def compute_pixelsize(
         left_top_geo: List[float],
         right_top_geo: List[float],
         left_bottom_geo: List[float],

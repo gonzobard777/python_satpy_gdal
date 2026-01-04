@@ -1,17 +1,17 @@
 from typing import List, Optional
 
-from compute_geotiff_geotransform import compute_geotiff_geotransform
+from compute_geotransform import compute_geotransform
 from copy_raster import copy_raster
 from init import init
 
 
-def create_geotiff(
+def create_geotiff_from_raster(
+        proj_desc: str,
         geotiff_path: str,
         raster_path: str,
         raster_lt_geo: List[float],
         raster_rt_geo: List[float],
         raster_lb_geo: List[float],
-        proj_desc: str,
         geotiff_creation_opts: Optional[List[str]] = None,
 ) -> None:
     """
@@ -25,7 +25,10 @@ def create_geotiff(
       - geotiff_creation_opts: опции создания GTiff (например ["TILED=YES","COMPRESS=DEFLATE",..])
     """
 
-    # Инициализация.
+    # Инициализация:
+    #  - создать проекцию
+    #  - прочитать растровую картинку
+    #  - создать geotiff
     proj, raster_dataset, geotiff_dataset = init(
         proj_desc,
         raster_path,
@@ -33,11 +36,11 @@ def create_geotiff(
         geotiff_creation_opts
     )
 
-    # Задать проекцию.
+    # 1. Задать проекцию.
     geotiff_dataset.SetProjection(proj.ExportToWkt())
 
-    # Задать геопривязку картинки.
-    geotransform = compute_geotiff_geotransform(
+    # 2. Задать геопривязку картинки.
+    geotransform = compute_geotransform(
         proj,
         geotiff_dataset,
         raster_lt_geo,
@@ -46,7 +49,7 @@ def create_geotiff(
     )
     geotiff_dataset.SetGeoTransform(geotransform)
 
-    # Скопировать картинку.
+    # 3. Скопировать картинку в GeoTIFF.
     copy_raster(raster_dataset, geotiff_dataset)
 
     # Записать/сбросить на диск.
