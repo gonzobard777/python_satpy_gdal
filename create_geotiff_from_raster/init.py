@@ -15,6 +15,7 @@ def init(
     proj = osr.SpatialReference()
     if proj.ImportFromProj4(proj_desc) != 0:
         raise Exception(f"Не удалось создать проекцию:\n{proj_desc}")
+    proj.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)  # для гарантии осей: X=Вправо, Y=Вверх
 
     # Открыть растровую картинку.
     raster_dataset = gdal.Open(raster_path, gdal.GA_ReadOnly)

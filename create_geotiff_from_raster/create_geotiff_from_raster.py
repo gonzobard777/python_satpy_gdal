@@ -18,10 +18,10 @@ def create_geotiff_from_raster(
     Создает GeoTIFF из входной растровой картинки и геопривязывает его по 3 углам + проекции.
 
     Аргументы:
+      - proj_desc: PROJ-строка целевой проекции (proj.org), например: "+proj=stere +lat_0=90 +lon_0=65 +R=6371008"
       - geotiff_path: путь до результирующего GeoTIFF
       - raster_path: путь до исходной картинки (png/jpg/tif/...)
       - raster_lt_geo, raster_rt_geo, raster_lb_geo: Координаты углов растра, [lon, lat] в градусах (WGS84)
-      - proj_desc: PROJ-строка целевой проекции (proj.org), например: "+proj=stere +lat_0=90 +lon_0=65 +R=6371008"
       - geotiff_creation_opts: опции создания GTiff (например ["TILED=YES","COMPRESS=DEFLATE",..])
     """
 
