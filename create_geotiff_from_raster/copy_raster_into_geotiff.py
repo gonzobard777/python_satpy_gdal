@@ -3,7 +3,7 @@ from typing import Tuple
 from osgeo import gdal
 
 
-def copy_raster(
+def copy_raster_into_geotiff(
         raster_dataset: gdal.Dataset,
         geotiff_dataset: gdal.Dataset,
         preferred_block_size_x: int = 1024,

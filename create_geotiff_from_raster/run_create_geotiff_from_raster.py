@@ -1,7 +1,7 @@
 from constant import C
 from create_geotiff_from_raster import create_geotiff_from_raster
 
-raster_file_name = 'piter_cell.png'
+raster_file_name = 'countries_800x800.png'
 geotif_file_name = 'geotiff.tif'
 
 create_geotiff_from_raster(

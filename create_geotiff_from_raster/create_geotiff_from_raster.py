@@ -1,8 +1,8 @@
 from typing import List, Optional
 
-from compute_geotransform import compute_geotransform
-from copy_raster import copy_raster
+from copy_raster_into_geotiff import copy_raster_into_geotiff
 from init import init
+from pixel_to_proj_converter import pixel_to_proj_converter
 
 
 def create_geotiff_from_raster(
@@ -36,21 +36,22 @@ def create_geotiff_from_raster(
         geotiff_creation_opts
     )
 
-    # 1. Задать проекцию.
+    # (1) Задать проекцию.
     geotiff_dataset.SetProjection(proj.ExportToWkt())
 
-    # 2. Задать геопривязку картинки.
-    geotransform = compute_geotransform(
+    # (2) Задать конвертер из Пиксельного пространства -> в пространство Проекции.
+    pixel_to_proj = pixel_to_proj_converter(
         proj,
         geotiff_dataset,
         raster_lt_geo,
         raster_rt_geo,
         raster_lb_geo
     )
-    geotiff_dataset.SetGeoTransform(geotransform)
+    # В GDAL этот конвертер почему-то называется GeoTransform.
+    geotiff_dataset.SetGeoTransform(pixel_to_proj)
 
-    # 3. Скопировать картинку в GeoTIFF.
-    copy_raster(raster_dataset, geotiff_dataset)
+    # (3) Скопировать содержимое растровой картинки внутрь GeoTIFF.
+    copy_raster_into_geotiff(raster_dataset, geotiff_dataset)
 
     # Записать/сбросить на диск.
     geotiff_dataset.FlushCache()

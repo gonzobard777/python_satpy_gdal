@@ -5,7 +5,7 @@ from osgeo import gdal, osr
 from osgeo.osr import SpatialReference
 
 
-def compute_geotransform(
+def pixel_to_proj_converter(
         proj: SpatialReference,
         geotiff_dataset: gdal.Dataset,
         raster_lt_geo: List[float],  # Угловые точки
