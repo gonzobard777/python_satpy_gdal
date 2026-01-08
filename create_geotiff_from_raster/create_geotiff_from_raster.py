@@ -1,3 +1,5 @@
+import argparse
+import sys
 from typing import List, Optional
 
 from copy_raster_into_geotiff import copy_raster_into_geotiff
@@ -58,3 +60,68 @@ def create_geotiff_from_raster(
 
     raster_dataset = None
     geotiff_dataset = None
+
+#-------------------------------
+
+def _parse_lon_lat(value: str) -> List[float]:
+    """
+    Парсит 'lon,lat' -> [lon, lat]
+    """
+    try:
+        lon, lat = map(float, value.split(","))
+        return [lon, lat]
+    except Exception:
+        raise argparse.ArgumentTypeError(f"Ожидается формат 'lon,lat', получено: {value}")
+
+
+def main(argv=None) -> None:
+    parser = argparse.ArgumentParser(description="Создание GeoTIFF из растра с геопривязкой по 3 углам")
+
+    parser.add_argument("--proj", required=True,
+                        help='PROJ-строка, например: "+proj=stere +lat_0=90 +lon_0=65 +R=6371008"')
+
+    parser.add_argument("--raster", required=True,
+                        help="Путь к исходному растру (png/jpg/tif/...)")
+
+    parser.add_argument("--out", required=True,
+                        help="Путь к результирующему GeoTIFF")
+
+    parser.add_argument("--lt", required=True, type=_parse_lon_lat,
+                        help="Левый верхний угол (lon,lat)")
+
+    parser.add_argument("--rt", required=True, type=_parse_lon_lat,
+                        help="Правый верхний угол (lon,lat)")
+
+    parser.add_argument("--lb", required=True, type=_parse_lon_lat,
+                        help="Левый нижний угол (lon,lat)")
+
+    parser.add_argument("--co", action="append", dest="creation_opts",
+                        help="Опция создания GeoTIFF (можно указывать несколько раз), "
+                             'например: --co TILED=YES --co COMPRESS=DEFLATE')
+
+    args = parser.parse_args(argv)
+
+    create_geotiff_from_raster(
+        proj_desc=args.proj,
+        geotiff_path=args.out,
+        raster_path=args.raster,
+        raster_lt_geo=args.lt,
+        raster_rt_geo=args.rt,
+        raster_lb_geo=args.lb,
+        geotiff_creation_opts=args.creation_opts
+    )
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])
+
+# Пример вызова:
+# python create_geotiff.py \
+#   --proj "+proj=stere +lat_0=90 +lon_0=65 +R=6371008" \
+#   --raster input.png \
+#   --out output.tif \
+#   --lt 30.0,80.0 \
+#   --rt 60.0,80.0 \
+#   --lb 30.0,70.0 \
+#   --co TILED=YES \
+#   --co COMPRESS=DEFLATE
